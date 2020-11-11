@@ -37,7 +37,7 @@ QES = QMS * RE/RES;
 QTS = QMS*QES/(QMS+QES);
 
 %% ============================
-% draw offbox data
+% draw offbox maginitude data
 % ============================
 figure; 
 loglog(frequency, magnitude);
@@ -56,5 +56,15 @@ n = 0.651;
 Zmot = ZmotMod(frequency, fs, RE, QMS, QES);
 L = LMod(frequency, LE, Le, n);
 loglog(frequency, abs(RE+Zmot+L), 'r');
+
+
+%% ============================
+% draw offbox phase data
+% ============================
+figure;
+semilogx(frequency, phase);
+hold on;
+
+loglog(frequency, angle(RE+Zmot+L)/pi*180, 'r');
 
 
