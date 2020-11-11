@@ -3,7 +3,7 @@ clear; clc;
 %% off box test
 path = '09_offbox.txt';
 [driverRadius,RE,VT,Vgen,frequency,magnitude,phase] = txtParser(path);
-% figure; loglog(frequency, magnitude);
+figure; loglog(frequency, magnitude);
 
 [M,ind] = max(magnitude, [], 'linear');
 RES = M - RE;
@@ -57,3 +57,19 @@ QMCT = (fCT / (f2CT-f1CT))*sqrt((RE+RES) / RE);
 QECT = QMCT*RE/RES;
 VAS = VT*(-1 + ( (fCT*QECT)/(fs*QES) ));
 clear M ind p x1 y1 ix1
+
+%% Conversion to infinite-baffle parameters
+kM = sqrt( 1 + 0.2699*( (VAS*(2*pi*fs)^2) / (driverRadius*345*345) ) );
+fs = fs/kM;
+QMS = QMS*kM; QES = QES*kM; QTS = QTS*kM;
+
+%% Three part model parameters (not verified yet)
+CMS = VAS/(1.18*(345^2)*(pi*(driverRadius^2))^2);
+CAS = VAS/(1.18*(345^2));
+MAS = 1/(4*pi*pi*fs*fs*CAS);
+MMS = 1/(4*pi*pi*fs*fs*CMS);
+RMS = (sqrt(MMS/CMS)) / QMS;
+RAS = (sqrt(MAS/CAS)) / QMS;
+RAE = -RAS + ((sqrt(MAS/CAS))/QTS);
+Bl_square = (RE*sqrt(MMS/CMS)) / QES;
+MMD = ((pi*(driverRadius^2))^2) * (MAS-2*( (8*1.18) / (3*pi*pi*driverRadius) ));
