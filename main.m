@@ -3,7 +3,7 @@ clear; clc;
 %% off box test
 path = '09_offbox.txt';
 [driverRadius,RE,VT,Vgen,frequency,magnitude,phase] = txtParser(path);
-figure; loglog(frequency, magnitude);
+% figure; loglog(frequency, magnitude);
 
 [M,ind] = max(magnitude, [], 'linear');
 RES = M - RE;
@@ -59,9 +59,10 @@ VAS = VT*(-1 + ( (fCT*QECT)/(fs*QES) ));
 clear M ind p x1 y1 ix1
 
 %% Conversion to infinite-baffle parameters
-kM = sqrt( 1 + 0.2699*( (VAS*(2*pi*fs)^2) / (driverRadius*345*345) ) );
-fs = fs/kM;
-QMS = QMS*kM; QES = QES*kM; QTS = QTS*kM;
+% Seems like it's better not doing this step. We can compare the results of ZVC to illustrate.
+% kM = sqrt( 1 + 0.2699*( (VAS*(2*pi*fs)^2) / (driverRadius*345*345) ) );
+% fs = fs/kM;
+% QMS = QMS*kM; QES = QES*kM; QTS = QTS*kM;
 
 %% Three part model parameters (not verified yet)
 CMS = VAS/(1.18*(345^2)*(pi*(driverRadius^2))^2);
@@ -73,3 +74,48 @@ RAS = (sqrt(MAS/CAS)) / QMS;
 RAE = -RAS + ((sqrt(MAS/CAS))/QTS);
 Bl_square = (RE*sqrt(MMS/CMS)) / QES;
 MMD = ((pi*(driverRadius^2))^2) * (MAS-2*( (8*1.18) / (3*pi*pi*driverRadius) ));
+
+%% n, Le, LE
+ind1 = 250; % choose different points to get closest approx. (219)
+ind2 = 301; % fix at highest frequency
+% ind1 = 1:1:301;
+% ind2 = 301;
+w1 = 2.*pi.*frequency(ind1);
+w2 = 2.*pi.*frequency(ind2);
+Z1 = magnitude(ind1).*exp(1j.*deg2rad(phase(ind1))); Y1 = 1./Z1;
+Z2 = magnitude(ind2).*exp(1j.*deg2rad(phase(ind2))); Y2 = 1./Z2;
+n = log10( real(Y1)./real(Y2) ) ./ log10( w2./w1 );
+Le = cos(n.*pi./2) ./ (real(Y1).*(w1.^n));
+LE = -1 ./ (w1 .* (imag(Y1) + (sin(n.*pi./2) ./ (Le.*(w1.^n))) ));
+clear ind1 ind2 w1 w2 Z1 Z2 Y1 Y2
+
+%% Small tweaking
+LE = 0.012;
+Le = 0.11;
+n = 0.665;
+
+% Le = 0.1300;
+% LE = 0.0100;
+% n = 0.6510;
+
+%% replot ZVC (Zmot, ZEL)
+w = 2.*pi.*frequency;
+ZL1 = 1j.*w.*LE; ZL2 = ((1j.*w).^n).*Le;
+ZEL = ZL1.*ZL2./(ZL1+ZL2);
+Zmot = Bl_square ./ (RMS + 1j.*w.*MMS + (1./(1j.*w.*CMS)));
+ZVC = RE + Zmot + ZEL;
+figure; loglog(frequency, magnitude); hold on;
+loglog(frequency, abs(ZVC)); hold off; title('Z_{VC} magnitude');
+legend('From original data', 'From data modeled parameters', 'Location', 'southeast');
+figure; semilogx(frequency, deg2rad(phase)); hold on;
+semilogx(frequency, angle(ZVC)); hold off; title('Z_{VC} phase');
+legend('From original data', 'From data modeled parameters', 'Location', 'southeast');
+
+figure; loglog(frequency, magnitude-RE-abs(Zmot)); hold on;
+loglog(frequency, abs(ZL1)); hold on;
+loglog(frequency, abs(ZL2)); 
+loglog(frequency, abs(ZEL)); hold off; title('Z_{EL} magnitude');
+legend('From original data', 'From data modeled parameters L_E', 'From data modeled parameters L_e', 'From data modeled parameters Z_{EL}', 'Location', 'southeast');
+% figure; loglog(frequency, deg2rad(phase)); hold on;
+% loglog(frequency, angle(ZEL)); hold off; title('Z_{EL} phase');
+% legend('From original data', 'From data modeled parameters', 'Location', 'southeast');
