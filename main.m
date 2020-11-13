@@ -13,14 +13,16 @@ p = polyfit(frequency(1:ind), magnitude(1:ind), 14); % 14th or 15th order both g
 x1 = linspace(10, fs, 20000);
 y1 = polyval(p,x1);
 % figure; loglog(frequency, magnitude); hold on;
-% loglog(x1,y1); hold off; grid on;
+% loglog(x1,y1); hold off;  xlabel('frequency (Hz)'); ylabel('Z_{VC} magnitude (ohms)');
+% legend('measured data', 'fitted polynomial', 'Location', 'southeast')
 [~,ix1] = min(abs(y1-R1));
 f1 = x1(ix1);
 p = polyfit(frequency(ind:45), magnitude(ind:45), 15); % 14th or 15th order both good
 x1 = linspace(fs, 27, 20000);
 y1 = polyval(p,x1);
 % figure; loglog(frequency, magnitude); hold on;
-% loglog(x1,y1); hold off; grid on;
+% loglog(x1,y1); hold off;  xlabel('frequency (Hz)'); ylabel('Z_{VC} magnitude (ohms)');
+% legend('measured data', 'fitted polynomial', 'Location', 'southeast')
 [~,ix1] = min(abs(y1-R1));
 f2 = x1(ix1);
 QMS = (fs / (f2-f1))*sqrt((RE+RES) / RE);
