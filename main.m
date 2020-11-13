@@ -60,23 +60,6 @@ QECT = QMCT*RE/RES;
 VAS = VT*(-1 + ( (fCT*QECT)/(fs*QES) ));
 clear M ind p x1 y1 ix1
 
-%% Conversion to infinite-baffle parameters
-% Seems like it's better not doing this step. We can compare the results of ZVC to illustrate.
-% kM = sqrt( 1 + 0.2699*( (VAS*(2*pi*fs)^2) / (driverRadius*345*345) ) );
-% fs = fs/kM;
-% QMS = QMS*kM; QES = QES*kM; QTS = QTS*kM;
-
-%% Three part model parameters (not verified yet)
-CMS = VAS/(1.18*(345^2)*(pi*(driverRadius^2))^2);
-CAS = VAS/(1.18*(345^2));
-MAS = 1/(4*pi*pi*fs*fs*CAS);
-MMS = 1/(4*pi*pi*fs*fs*CMS);
-RMS = (sqrt(MMS/CMS)) / QMS;
-RAS = (sqrt(MAS/CAS)) / QMS;
-RAE = -RAS + ((sqrt(MAS/CAS))/QTS);
-Bl_square = (RE*sqrt(MMS/CMS)) / QES;
-MMD = ((pi*(driverRadius^2))^2) * (MAS-2*( (8*1.18) / (3*pi*pi*driverRadius) ));
-
 %% n, Le, LE
 ind1 = 250; % choose different points to get closest approx. (219)
 ind2 = 301; % fix at highest frequency
@@ -101,10 +84,11 @@ n = 0.665;
 % n = 0.6510;
 
 %% replot ZVC (Zmot, ZEL)
-w = 2.*pi.*frequency;
-ZL1 = 1j.*w.*LE; ZL2 = ((1j.*w).^n).*Le;
+ZL1 = 2*pi.*frequency*1j*LE; ZL2 = ((2*pi.*frequency*1j).^n).*Le;
 ZEL = ZL1.*ZL2./(ZL1+ZL2);
-Zmot = Bl_square ./ (RMS + 1j.*w.*MMS + (1./(1j.*w.*CMS)));
+RES = RE * QMS / QES;
+Zmot = RES * (1/QMS)*(frequency*1j/fs) ./ ((frequency*1j/fs).*(frequency*1j/fs) + (1/QMS)*(frequency*1j/fs) + 1);
+% Zmot = Bl_square ./ (RMS + 1j.*w.*MMS + (1./(1j.*w.*CMS)));
 ZVC = RE + Zmot + ZEL;
 figure; loglog(frequency, magnitude); hold on;
 loglog(frequency, abs(ZVC)); hold off; title('Z_{VC} magnitude');
@@ -121,3 +105,20 @@ legend('From original data', 'From data modeled parameters L_E', 'From data mode
 % figure; loglog(frequency, deg2rad(phase)); hold on;
 % loglog(frequency, angle(ZEL)); hold off; title('Z_{EL} phase');
 % legend('From original data', 'From data modeled parameters', 'Location', 'southeast');
+
+%% Conversion to infinite-baffle parameters
+% Seems like it's better not doing this step. We can compare the results of ZVC to illustrate.
+% kM = sqrt( 1 + 0.2699*( (VAS*(2*pi*fs)^2) / (driverRadius*345*345) ) );
+% fs = fs/kM;
+% QMS = QMS*kM; QES = QES*kM; QTS = QTS*kM;
+
+%% Three part model parameters (not verified yet)
+CMS = VAS/(1.18*(345^2)*(pi*(driverRadius^2))^2);
+CAS = VAS/(1.18*(345^2));
+MAS = 1/(4*pi*pi*fs*fs*CAS);
+MMS = 1/(4*pi*pi*fs*fs*CMS);
+RMS = (sqrt(MMS/CMS)) / QMS;
+RAS = (sqrt(MAS/CAS)) / QMS;
+RAE = -RAS + ((sqrt(MAS/CAS))/QTS);
+Bl_square = (RE*sqrt(MMS/CMS)) / QES;
+MMD = ((pi*(driverRadius^2))^2) * (MAS-2*( (8*1.18) / (3*pi*pi*driverRadius) ));
