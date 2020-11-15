@@ -75,42 +75,45 @@ LE = -1 ./ (w1 .* (imag(Y1) + (sin(n.*pi./2) ./ (Le.*(w1.^n))) ));
 clear ind1 ind2 w1 w2 Z1 Z2 Y1 Y2
 
 %% Small tweaking
-LE = 0.012;
-Le = 0.11;
-n = 0.665;
+% LE = 0.012;
+% Le = 0.11;
+% n = 0.665;
 
-% Le = 0.1300;
-% LE = 0.0100;
-% n = 0.6510;
+Le = 0.1300;
+LE = 0.0100;
+n = 0.6510;
 
 %% replot ZVC (Zmot, ZEL)
 ZL1 = 2*pi.*frequency*1j*LE; ZL2 = ((2*pi.*frequency*1j).^n).*Le;
 ZEL = ZL1.*ZL2./(ZL1+ZL2);
 RES = RE * QMS / QES;
 Zmot = RES * (1/QMS)*(frequency*1j/fs) ./ ((frequency*1j/fs).*(frequency*1j/fs) + (1/QMS)*(frequency*1j/fs) + 1);
+
 % Zmot = Bl_square ./ (RMS + 1j.*w.*MMS + (1./(1j.*w.*CMS)));
 ZVC = RE + Zmot + ZEL;
 figure; loglog(frequency, magnitude); hold on;
-loglog(frequency, abs(ZVC)); hold off; title('Z_{VC} magnitude');
-legend('From original data', 'From data modeled parameters', 'Location', 'southeast');
+loglog(frequency, abs(ZVC)); hold off; 
+xlabel('frequency (Hz)'); ylabel('Z_{VC} magnitude (ohms)');
+legend('From measured data', 'From data modeled parameters', 'Location', 'southeast');
 figure; semilogx(frequency, deg2rad(phase)); hold on;
 semilogx(frequency, angle(ZVC)); hold off; title('Z_{VC} phase');
 legend('From original data', 'From data modeled parameters', 'Location', 'southeast');
 
-figure; loglog(frequency, magnitude-RE-abs(Zmot)); hold on;
+figure; loglog(frequency, magnitude); hold on;
 loglog(frequency, abs(ZL1)); hold on;
 loglog(frequency, abs(ZL2)); 
-loglog(frequency, abs(ZEL)); hold off; title('Z_{EL} magnitude');
-legend('From original data', 'From data modeled parameters L_E', 'From data modeled parameters L_e', 'From data modeled parameters Z_{EL}', 'Location', 'southeast');
+loglog(frequency, abs(ZEL)); hold off; 
+xlabel('frequency (Hz)'); title('magnitude of impedances of inductances');
+legend('Z_{VC} from measured data', 'Z_{L_E} from data modeled parameters', 'Z_{L_e} from data modeled parameters', 'Parallel combination of Z_{L_E} and Z_{L_e}', 'Location', 'southeast');
 % figure; loglog(frequency, deg2rad(phase)); hold on;
 % loglog(frequency, angle(ZEL)); hold off; title('Z_{EL} phase');
 % legend('From original data', 'From data modeled parameters', 'Location', 'southeast');
 
 %% Conversion to infinite-baffle parameters
 % Seems like it's better not doing this step. We can compare the results of ZVC to illustrate.
-% kM = sqrt( 1 + 0.2699*( (VAS*(2*pi*fs)^2) / (driverRadius*345*345) ) );
-% fs = fs/kM;
-% QMS = QMS*kM; QES = QES*kM; QTS = QTS*kM;
+kM = sqrt( 1 + 0.2699*( (VAS*(2*pi*fs)^2) / (driverRadius*345*345) ) );
+fs = fs/kM;
+QMS = QMS*kM; QES = QES*kM; QTS = QTS*kM;
 
 %% Three part model parameters (not verified yet)
 CMS = VAS/(1.18*(345^2)*(pi*(driverRadius^2))^2);
