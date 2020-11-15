@@ -30,6 +30,10 @@ x2 = 23.667;
 y2 = 38.3151;
 f2 = (x1-x2) * (R1-y1) / (y2-y1) + x1;
 
+% f1 f2 by poly
+f1 = 12.706147944897245;
+f2 = 23.266324821241064;
+%xxx = (sqrt(f1*f2)-fs)/fs;
 
 % small signal parameters
 QMS = fs / (f2-f1) * sqrt((RE+RES)/RE);

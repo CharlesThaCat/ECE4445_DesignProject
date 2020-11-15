@@ -7,7 +7,7 @@ fileID = fopen(path,'r');
 
 tline = fgetl(fileID);
 % driver frame radius in meter
-driverRadius = (str2double(tline(1:2))/2)*0.0254; 
+driverRadius = str2double(tline(1:2))/100; 
 % voice coil resistance in ohm
 RE = str2double(tline(19:22));
 % test box volume in m^3

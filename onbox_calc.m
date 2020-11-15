@@ -31,6 +31,10 @@ x2 = 70.33569;
 y2 = 020.47655;
 f2ct = (x1-x1) * (R1-y1) / (y2-y1) + x1;
 
+% f1ct f2ct by poly
+f1ct = 49.609922103605180; 
+f2ct = 69.611434609230460;
+
 % small signal parameters
 QMCT = fct / (f2ct-f1ct) * sqrt((RE+RES)/RE);
 QECT = QMCT * RE/RES;
@@ -42,7 +46,8 @@ QTCT = QMCT*QECT/(QMCT+QECT);
 
 % fs and QES are from offbox
 fs = 17.4392;
-QES = 0.2440;
+% QES = 0.2440;
+QES = 0.2419;
 
 VAS = VT * (fct/fs * QECT/QES - 1);
 
