@@ -70,6 +70,8 @@ Bl = sqrt(RE / QES * sqrt(MMS/CMS));
 
 %%
 figure; 
+
+% measured ZVC
 loglog(frequency, magnitude);
 % semilogx(frequency, phase);
 
@@ -90,6 +92,29 @@ ZAB = ZAF;
 
 ZVC = ZE + ((Bl)^2/SD^2) ./ (ZM/SD^2 + ZAF + ZAB);
 
+% modelled ZVC
 loglog(frequency, abs(ZVC), 'r');
 %loglog(frequency, abs((Bl)^2./ZM + ZE), 'g');
 %semilogx(frequency, angle(phase)/pi*180, 'r');
+
+%%
+% hold on;
+% A = readmatrix("dp-part-2-cb-ZVC.csv");
+% loglog(A(:, 1), A(:, 2), 'b');
+
+% modelled pD
+Gs = (jomega/(2*pi*fs)).^2 ./ ((jomega/(2*pi*fs)).^2 + 1/QTS * jomega/(2*pi*fs) + 1);
+pD = rho_0/(2*pi) * Bl/(SD*RE*MAS) * Gs;
+
+hold on;
+loglog(frequency, abs(pD), 'r');
+
+% simulated pD
+A = readmatrix("dp-part-2-ib-UD.csv");
+ms_f = A(:, 1);
+ms_UD = A(:, 2);
+ms_jomega = 2*pi*ms_f;
+ms_p = rho_0 / (2*pi) * ms_jomega .* ms_UD;
+
+hold on;
+loglog(ms_f, abs(ms_p), 'b');
