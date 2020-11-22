@@ -97,19 +97,44 @@ loglog(frequency, abs(ZVC), 'r');
 %loglog(frequency, abs((Bl)^2./ZM + ZE), 'g');
 %semilogx(frequency, angle(phase)/pi*180, 'r');
 
-%%
-% hold on;
-% A = readmatrix("dp-part-2-cb-ZVC.csv");
-% loglog(A(:, 1), A(:, 2), 'b');
+%% Infinite-baffle
 
-% modelled pD
-Gs = (jomega/(2*pi*fs)).^2 ./ ((jomega/(2*pi*fs)).^2 + 1/QTS * jomega/(2*pi*fs) + 1);
-pD = rho_0/(2*pi) * Bl/(SD*RE*MAS) * Gs;
+% simulated ZVC with inductance
+A = readmatrix("dp-part-2-ib-ZVC.csv");
+ms_f = A(:, 1);
+ms_ZVC = A(:, 2);
 
 hold on;
-loglog(frequency, abs(pD), 'r');
+loglog(ms_f, abs(ms_ZVC), 'r');
 
-% simulated pD
+% % modelled pD without inductance
+% Gs = (jomega/(2*pi*fs)).^2 ./ ((jomega/(2*pi*fs)).^2 + 1/QTS * jomega/(2*pi*fs) + 1);
+% pD = rho_0/(2*pi) * Bl/(SD*RE*MAS) * Gs;
+% 
+% hold on;
+% loglog(frequency, abs(pD), 'r');
+
+% simulated pD without inductance
+A = readmatrix("dp-part-2-ib-UD-noL.csv");
+ms_f = A(:, 1);
+ms_UD = A(:, 2);
+ms_jomega = 2*pi*ms_f;
+ms_p = rho_0 / (2*pi) * ms_jomega .* ms_UD;
+
+hold on;
+loglog(ms_f, abs(ms_p), 'b');
+
+
+% % modelled pD with inductance
+% omega_u1 = RE*MAS/(MAD*LE);
+% f_u1 = omega_u1 / (2*pi);
+% Ts = 1 ./ (1 + jomega/omega_u1);
+% pD = rho_0/(2*pi) * Bl/(SD*RE*MAS) * Gs .* Ts;
+% 
+% hold on;
+% loglog(frequency, abs(pD), 'r');
+
+% simulated pD with inductance
 A = readmatrix("dp-part-2-ib-UD.csv");
 ms_f = A(:, 1);
 ms_UD = A(:, 2);
@@ -118,3 +143,34 @@ ms_p = rho_0 / (2*pi) * ms_jomega .* ms_UD;
 
 hold on;
 loglog(ms_f, abs(ms_p), 'b');
+
+%% Closed-box
+
+% simulated ZVC with inductance
+A = readmatrix("dp-part-2-cb-ZVC.csv");
+ms_f = A(:, 1);
+ms_ZVC = A(:, 2);
+
+hold on;
+loglog(ms_f, abs(ms_ZVC), 'r');
+
+% simulated pD without inductance
+A = readmatrix("dp-part-2-cb-UD-noL.csv");
+ms_f = A(:, 1);
+ms_UD = A(:, 2);
+ms_jomega = 2*pi*ms_f;
+ms_p = rho_0 / (2*pi) * ms_jomega .* ms_UD;
+
+hold on;
+loglog(ms_f, abs(ms_p), 'b');
+
+% simulated pD with inductance
+A = readmatrix("dp-part-2-cb-UD.csv");
+ms_f = A(:, 1);
+ms_UD = A(:, 2);
+ms_jomega = 2*pi*ms_f;
+ms_p = rho_0 / (2*pi) * ms_jomega .* ms_UD;
+
+hold on;
+loglog(ms_f, abs(ms_p), 'b');
+
