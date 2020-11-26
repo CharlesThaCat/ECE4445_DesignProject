@@ -116,10 +116,11 @@ ZVC = ZE + ((Bl)^2/SD^2) ./ (ZM/SD^2 + ZAF + ZAB);
 % ylabel('Z_{VC} magnitude (Ohm)');
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Do not comment the first 4 calculation sections!!
+% Do NOT comment the first 4 calculation sections!!
 % modelled p without inductance
 Gs = (jomega/(2*pi*fs)).^2 ./ ((jomega/(2*pi*fs)).^2 + 1/QTS * jomega/(2*pi*fs) + 1);
 ib_SPL_mod_nol = SPL(abs(rho_0/(2*pi) * Bl/(SD*RE*MAS) * Gs)/sqrt(2)); % convert to prms first
+fl = fs*sqrt(((1/(2*QTS^2)-1) + sqrt((1/(2*QTS^2)-1)^2+1))); % lower cutoff freq
 
 % simulated p without inductance
 A = readmatrix("dp-part-2-ib-UD-noL.csv");
@@ -147,6 +148,7 @@ ib_f_sim = ms_f;
 ib_UD_sim = ms_UD;
 ib_xD_sim = ib_UD_sim ./ ms_omega;
 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % % Uncomment this part to plot SPL
 % % plot SPL
 % semilogx(frequency, ib_SPL_mod_nol, 'r--');
@@ -160,25 +162,65 @@ ib_xD_sim = ib_UD_sim ./ ms_omega;
 % hold on;
 % semilogx(ib_f_sim, ib_SPL_sim, 'c');
 % 
+% hold on;
+% plot(64.4836, 76.1373, 'r*'); % modeled cutoff
+% 
+% hold on;
+% plot(69.1831, 76.3818, 'b*'); % simulated cutoff
+% 
 % legend('Modeled SPL without L_E','Simulated SPL without L_E', 'Modeled SPL with L_E', 'Simulated SPL with L_E');
 % xlabel('frequency (Hz)');
 % ylabel('on-axis SPL (dB)');
 
-% % Uncomment this part to plot UD
-% semilogx(ib_f_sim_nol, ib_UD_sim_nol, 'r');
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % Uncomment this part to plot UD with LE
+% % plot modeled UD
+% ib_jomega_sim = 1j*2*pi*ib_f_sim; % use the same freq points as the simulated curve does
+% ib_UD_mod = abs(SD/Bl * RAE/RAT * (1/QTS * ib_jomega_sim / (2*pi*fs)) ./ ((ib_jomega_sim/(2*pi*fs)).^2 + 1/QTS*ib_jomega_sim/(2*pi*fs) + 1));
+% semilogx(ib_f_sim, ib_UD_mod, 'b');
 % hold on;
-% semilogx(ib_f_sim, ib_UD_sim, 'b');
-% legend('Simulated U_D without L_E', 'Simulated U_D with L_E');
+% % plot simulated UD
+% semilogx(ib_f_sim, ib_UD_sim, 'r');
+% 
+% % max point of modeled curve: (fs, 0.0031686)
+% ib_UD_max_mod = 0.0031686;
+% xline(fs); % modeled resonance freq
+% yline(ib_UD_max_mod/sqrt(2)); % modeled -3db line
+% 
+% % max point of simulated curve: (26.9153, 0.0032089)
+% ib_UD_max_sim = 0.0032089;
+% ib_fs_sim = 26.9153;
+% xline(ib_fs_sim, '--')
+% yline(ib_UD_max_sim/sqrt(2), '--'); % 0.002269
+% 
+% % plot cutoffs for the modeled curve
+% % lower cutoff: (3.90714947735, 0.00224)
+% plot(3.90714947735, 0.00224, 'b*');
+% % higher cutoff: (72.4436, 0.00224)
+% plot(72.4436, 0.00224, 'b*');
+% 
+% % plot cutoffs for the simulated curve
+% % lower cutoff: (4.234888, 0.002269)
+% plot(4.234888, 0.002269, 'r*');
+% % higher cutoff: (84.2727257, 0.002269)
+% plot(84.2727257, 0.002269, 'r*');
+% 
 % xlabel('frequency (Hz)');
 % ylabel('U_D (m^3/s)');
+% legend('modeled U_D','simulated U_D');
 
-% Uncomment this part to plot xD
-% semilogx(ib_f_sim_nol, ib_xD_sim_nol, 'r');
-% hold on;
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Uncomment this part to plot xD with LE
 % semilogx(ib_f_sim, ib_xD_sim, 'b');
-% legend('Simulated x_D without L_E', 'Simulated x_D with L_E');
 % xlabel('frequency (Hz)');
 % ylabel('x_D (m)');
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% (not needed) Uncomment this part to plot UD and xD without LE
+% semilogx(ib_f_sim_nol, ib_UD_sim_nol, 'r');
+% hold on;
+% semilogx(ib_f_sim_nol, ib_xD_sim_nol, 'r');
 
 %% Closed-box
 
