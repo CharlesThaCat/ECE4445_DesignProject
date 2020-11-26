@@ -72,10 +72,10 @@ Bl = sqrt(RE / QES * sqrt(MMS/CMS));
 figure; 
 
 % measured ZVC
-loglog(frequency, magnitude);
+%loglog(frequency, magnitude);
 % semilogx(frequency, phase);
 
-hold on;
+%hold on;
 
 jomega = 1j*2*pi*frequency;
 Z_LE = jomega * LE;
@@ -93,84 +93,120 @@ ZAB = ZAF;
 ZVC = ZE + ((Bl)^2/SD^2) ./ (ZM/SD^2 + ZAF + ZAB);
 
 % modelled ZVC
-loglog(frequency, abs(ZVC), 'r');
+% loglog(frequency, abs(ZVC), 'r', 'LineWidth', 1);
 %loglog(frequency, abs((Bl)^2./ZM + ZE), 'g');
 %semilogx(frequency, angle(phase)/pi*180, 'r');
 
 %% Infinite-baffle
 
-% simulated ZVC with inductance
-A = readmatrix("dp-part-2-ib-ZVC.csv");
-ms_f = A(:, 1);
-ms_ZVC = A(:, 2);
-
-hold on;
-loglog(ms_f, abs(ms_ZVC), 'r');
-
-% % modelled pD without inductance
-% Gs = (jomega/(2*pi*fs)).^2 ./ ((jomega/(2*pi*fs)).^2 + 1/QTS * jomega/(2*pi*fs) + 1);
-% pD = rho_0/(2*pi) * Bl/(SD*RE*MAS) * Gs;
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % Uncomment this section to plot ZVC
+% % modelled ZVC with inductance
+% loglog(frequency, abs(ZVC), 'r--', 'LineWidth', 1);
+% 
+% % simulated ZVC with inductance
+% A = readmatrix("dp-part-2-ib-ZVC.csv");
+% ms_f = A(:, 1);
+% ms_ZVC = A(:, 2);
 % 
 % hold on;
-% loglog(frequency, abs(pD), 'r');
+% loglog(ms_f, abs(ms_ZVC), 'b');
+% legend('Modeled Z_{VC}','Simulated Z_{VC}');
+% xlabel('frequency (Hz)');
+% ylabel('Z_{VC} magnitude (Ohm)');
 
-% simulated pD without inductance
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Do not comment the first 4 calculation sections!!
+% modelled p without inductance
+Gs = (jomega/(2*pi*fs)).^2 ./ ((jomega/(2*pi*fs)).^2 + 1/QTS * jomega/(2*pi*fs) + 1);
+ib_SPL_mod_nol = SPL(abs(rho_0/(2*pi) * Bl/(SD*RE*MAS) * Gs)/sqrt(2)); % convert to prms first
+
+% simulated p without inductance
 A = readmatrix("dp-part-2-ib-UD-noL.csv");
 ms_f = A(:, 1);
 ms_UD = A(:, 2);
-ms_jomega = 2*pi*ms_f;
-ms_p = rho_0 / (2*pi) * ms_jomega .* ms_UD;
+ms_omega = 2*pi*ms_f;
+ib_SPL_sim_nol = SPL(rho_0 / (2*pi) * ms_omega .* ms_UD / sqrt(2)); % convert to prms first
+ib_f_sim_nol = ms_f;
+ib_UD_sim_nol = ms_UD; % this is magnitude
+ib_xD_sim_nol = ib_UD_sim_nol ./ ms_omega;
 
-hold on;
-loglog(ms_f, abs(ms_p), 'b');
+% modelled p with inductance
+omega_u1 = RE*MAS/(MAD*LE);
+f_u1 = omega_u1 / (2*pi);
+Ts = 1 ./ (1 + jomega/omega_u1);
+ib_SPL_mod = SPL(abs(rho_0/(2*pi) * Bl/(SD*RE*MAS) * Gs .* Ts)/sqrt(2)); % convert to prms first
 
-
-% % modelled pD with inductance
-% omega_u1 = RE*MAS/(MAD*LE);
-% f_u1 = omega_u1 / (2*pi);
-% Ts = 1 ./ (1 + jomega/omega_u1);
-% pD = rho_0/(2*pi) * Bl/(SD*RE*MAS) * Gs .* Ts;
-% 
-% hold on;
-% loglog(frequency, abs(pD), 'r');
-
-% simulated pD with inductance
+% simulated p with inductance
 A = readmatrix("dp-part-2-ib-UD.csv");
 ms_f = A(:, 1);
 ms_UD = A(:, 2);
-ms_jomega = 2*pi*ms_f;
-ms_p = rho_0 / (2*pi) * ms_jomega .* ms_UD;
+ms_omega = 2*pi*ms_f;
+ib_SPL_sim = SPL(rho_0 / (2*pi) * ms_omega .* ms_UD / sqrt(2)); % convert to prms first
+ib_f_sim = ms_f;
+ib_UD_sim = ms_UD;
+ib_xD_sim = ib_UD_sim ./ ms_omega;
 
-hold on;
-loglog(ms_f, abs(ms_p), 'b');
+% % Uncomment this part to plot SPL
+% % plot SPL
+% semilogx(frequency, ib_SPL_mod_nol, 'r--');
+% 
+% hold on;
+% semilogx(ib_f_sim_nol, ib_SPL_sim_nol, 'b');
+% 
+% hold on;
+% semilogx(frequency, ib_SPL_mod, 'm--');
+% 
+% hold on;
+% semilogx(ib_f_sim, ib_SPL_sim, 'c');
+% 
+% legend('Modeled SPL without L_E','Simulated SPL without L_E', 'Modeled SPL with L_E', 'Simulated SPL with L_E');
+% xlabel('frequency (Hz)');
+% ylabel('on-axis SPL (dB)');
+
+% % Uncomment this part to plot UD
+% semilogx(ib_f_sim_nol, ib_UD_sim_nol, 'r');
+% hold on;
+% semilogx(ib_f_sim, ib_UD_sim, 'b');
+% legend('Simulated U_D without L_E', 'Simulated U_D with L_E');
+% xlabel('frequency (Hz)');
+% ylabel('U_D (m^3/s)');
+
+% Uncomment this part to plot xD
+% semilogx(ib_f_sim_nol, ib_xD_sim_nol, 'r');
+% hold on;
+% semilogx(ib_f_sim, ib_xD_sim, 'b');
+% legend('Simulated x_D without L_E', 'Simulated x_D with L_E');
+% xlabel('frequency (Hz)');
+% ylabel('x_D (m)');
 
 %% Closed-box
 
-% simulated ZVC with inductance
-A = readmatrix("dp-part-2-cb-ZVC.csv");
-ms_f = A(:, 1);
-ms_ZVC = A(:, 2);
-
-hold on;
-loglog(ms_f, abs(ms_ZVC), 'r');
-
-% simulated pD without inductance
-A = readmatrix("dp-part-2-cb-UD-noL.csv");
-ms_f = A(:, 1);
-ms_UD = A(:, 2);
-ms_jomega = 2*pi*ms_f;
-ms_p = rho_0 / (2*pi) * ms_jomega .* ms_UD;
-
-hold on;
-loglog(ms_f, abs(ms_p), 'b');
-
-% simulated pD with inductance
-A = readmatrix("dp-part-2-cb-UD.csv");
-ms_f = A(:, 1);
-ms_UD = A(:, 2);
-ms_jomega = 2*pi*ms_f;
-ms_p = rho_0 / (2*pi) * ms_jomega .* ms_UD;
-
-hold on;
-loglog(ms_f, abs(ms_p), 'b');
+% % simulated ZVC with inductance
+% A = readmatrix("dp-part-2-cb-ZVC.csv");
+% ms_f = A(:, 1);
+% ms_ZVC = A(:, 2);
+% 
+% hold on;
+% loglog(ms_f, abs(ms_ZVC), 'r');
+% 
+% % simulated pD without inductance
+% A = readmatrix("dp-part-2-cb-UD-noL.csv");
+% ms_f = A(:, 1);
+% ms_UD = A(:, 2);
+% ms_jomega = 2*pi*ms_f;
+% ms_p = rho_0 / (2*pi) * ms_jomega .* ms_UD;
+% 
+% hold on;
+% loglog(ms_f, abs(ms_p), 'b');
+% 
+% % simulated pD with inductance
+% A = readmatrix("dp-part-2-cb-UD.csv");
+% ms_f = A(:, 1);
+% ms_UD = A(:, 2);
+% ms_jomega = 2*pi*ms_f;
+% ms_p = rho_0 / (2*pi) * ms_jomega .* ms_UD;
+% 
+% hold on;
+% loglog(ms_f, abs(ms_p), 'b');
 
